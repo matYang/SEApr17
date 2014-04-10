@@ -24,6 +24,7 @@ module.exports = exports = function(webot){
       return info.is('event') && info.param.event === 'subscribe' || reg_help.test(info.text);
     },
     handler: function(info,next){
+      console.log("entering starting handler");
 
       var userName = info.uid;
       var reply = {
@@ -57,6 +58,7 @@ module.exports = exports = function(webot){
     description:'选择吃什么！',
     pattern: /(?:吃啥|吃？啥|food)\s*(\d*)/, //exam|
     handler: function(info){
+      console.log("entering food handler");
       info.wait('wait_food');
       return "请输入选择代号，例如如果要选择Sushi，请输入 '1':\n1: Sushi\n2: 火锅\n3: 烧烤";
     }
@@ -72,6 +74,7 @@ module.exports = exports = function(webot){
     description:'选择玩什么！',
     pattern: /(?:玩啥|玩？啥|play)\s*(\d*)/, //exam|
     handler: function(info){
+      console.log("entering play handler");
       info.wait('wait_play');
       return "请输入选择代号，例如如果要选择三国杀，请输入 '1':\n1: 三国杀\n2: 杀人游戏\n3: hackathon";
     }
