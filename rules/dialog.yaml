@@ -8,11 +8,20 @@ hello:
   - fine
   - how are you
 
-emma: emma你妹你全家都emma
+emma: 'emma你妹你全家都emma'
+2b|shabi|傻逼|大傻逼|白痴|2|笨蛋|蠢货|煞笔: '请问您是不是指Susie'
+
+安排: '暂时还没定，请先投票'
+
+有谁: |
+  18届: Vera,Susie,
+  16届: Matt, Tracey, Monkey
+  14届: Elton, ZZ, Molly
+
+
 
 test:
   - Roger that!
-  # YAML可能会把微信的表情符解析为数组，引号引起来比较保险
   - "收到你的测试消息了！嘻嘻..[可爱]"
 
 # 回复多行文本，只需在冒号后面加上竖线（|）

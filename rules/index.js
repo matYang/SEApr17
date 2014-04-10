@@ -32,7 +32,12 @@ module.exports = exports = function(webot){
         url: 'https://github.com/node-webot',
         description: [
           '你可以试试以下指令:',
-            'exam : 查看exam schedule',
+          'exam : 查看exam schedule',
+          'emma : 调戏公众Matt',
+          '安排  : 查看4月17日安排',
+          '有谁  : 查看4月17日都有谁来',
+          '吃啥  : 投票选择4月17日吃什么',
+          '玩啥  : 投票选择4月17日玩什么'
         ].join('\n')
       };
       next(null,reply);
@@ -40,13 +45,43 @@ module.exports = exports = function(webot){
     }
   });
 
+  // Simple conversation 
+  // 简单的纯文本对话，可以用单独的 yaml 文件来定义
+  require('js-yaml');
+  webot.dialog(__dirname + '/dialog.yaml');
 
 
 
 
+  webot.set('吃啥',{
+    description:'选择吃什么！',
+    pattern: /(?:吃啥|吃？啥|food)\s*(\d*)/, //exam|
+    handler: function(info){
+      info.wait('wait_food');
+      return "请输入选择代号，例如如果要选择Sushi，请输入 '1':\n1: Sushi\n2: 火锅\n3: 烧烤";
+    }
+  });
+  webot.waitRule('wait_food', function(info) {
+    var choice_food = parseInt(info.text, 10);
+    var output = '谢谢您的投票';
+    console.log('吃_投票： ' + choice_food);
+    return output;
+  });
 
-
-
+  webot.set('玩啥',{
+    description:'选择玩什么！',
+    pattern: /(?:玩啥|玩？啥|play)\s*(\d*)/, //exam|
+    handler: function(info){
+      info.wait('wait_play');
+      return "请输入选择代号，例如如果要选择三国杀，请输入 '1':\n1: 三国杀\n2: 杀人游戏\n3: hackathon";
+    }
+  });
+  webot.waitRule('wait_play', function(info) {
+    var choice_play = parseInt(info.text, 10);
+    var output = '谢谢您的投票';
+    console.log('玩_投票：' + choice_play);
+    return output;
+  });
 
 
 
@@ -62,14 +97,18 @@ module.exports = exports = function(webot){
       '没有更多啦！当前可用指令：\n' + reply];
   });
 
-
-
-  // Simple conversation 
-  // 简单的纯文本对话，可以用单独的 yaml 文件来定义
-  require('js-yaml');
-  webot.dialog(__dirname + '/dialog.yaml');
-
   
+  webot.set('exam schedule',{
+    description:'发送: exam, 查询你的考试时间地点',
+    pattern: /(?:exam|考？试|Exam)\s*(\d*)/, //exam|
+    handler: function(info){
+      var num = 3;
+      info.session.course = num;
+      // console.log(info.raw['FromUserName']);
+      info.wait('wait_class');
+      return "请输入课号 eg.cs115";
+    }
+  });
   //using uwp API to search for exam schedules
   webot.waitRule('wait_class', function(info) {
     var courseName = info.text;
@@ -101,17 +140,8 @@ module.exports = exports = function(webot){
   }
      return output;
   });
-  webot.set('exam schedule',{
-    description:'发送: exam, 查询你的考试时间地点',
-    pattern: /(?:exam|考？试|Exam)\s*(\d*)/, //exam|
-    handler: function(info){
-      var num = 3;
-      info.session.course = num;
-      // console.log(info.raw['FromUserName']);
-      info.wait('wait_class');
-      return "请输入课号 eg.cs115";
-    }
-  });
+
+
 
   webot.set('check_image', {
     description: '发送图片,我将返回其hash值',
