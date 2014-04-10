@@ -8,8 +8,8 @@ var verbose = require('debug')('webot-example:verbose');
 var app = express();
 var wx_token = 'wewaterloo2014';
 
-var webot = new webot_lib.Webot({'lang':'zh_cn'});
-require('./rules')(webot_zh_cn);
+var webot = new webot_lib.Webot();
+require('./rules')(webot);
 webot.watch(app, { token: wx_token});
 
 // 如果需要 session 支持，sessionStore 必须放在 watch 之后
