@@ -28,7 +28,7 @@ module.exports = exports = function(webot){
 
       var userName = info.uid;
       var reply = {
-        title: '感谢你关注WeLoo公众平台',
+        title: '感谢你关注uwse公众平台',
         pic: 'http://i.imgur.com/ySk4ojW.jpg',
         url: 'https://github.com/node-webot',
         description: [

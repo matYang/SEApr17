@@ -21,6 +21,12 @@ app.use(express.session({
 }));
 
 
+var logger = function(req, res, next) {
+    console.log("GOT REQUEST !");
+    next(); // Passing the request to the next handler in the stack.
+};
+app.use(logger);
+
 var port = 80;
 app.listen(port, function(){
   log("Listening on %s", port);
