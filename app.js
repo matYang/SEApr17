@@ -28,7 +28,7 @@ app.listen(port, function(){
 
 // 微信接口地址只允许服务放在 80 端口
 // 所以需要做一层 proxy
-app.enable('trust proxy');
+//app.enable('trust proxy');
 
 if(!process.env.DEBUG){
   console.log("set env variable `DEBUG=webot-example:*` to display debug info.");
