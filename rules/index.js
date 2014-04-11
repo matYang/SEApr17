@@ -129,7 +129,7 @@ module.exports = exports = function(webot){
     if (isNaN(choice_play) || choice_play < 1 || choice_play > play_list.length){
       return 'Out of bounds啦！祝你天天segmentation fault！';
     }
-    redis.incr(redis_play_key_base+(choice_food-1));
+    redis.incr(redis_play_key_base+(choice_play-1));
     redis.sadd(redis_play_idSet, info.uid);
     console.log('玩_投票：' + choice_play);
     next(null, '谢谢您的投票');
