@@ -14,8 +14,8 @@ var redis = require('../utils/redis.js').initialize();
 
 var redis_food_key_base = 'food_';
 var redis_play_key_base = 'play_';
-var redis_food_idList = 'food_idList';
-var redis_play_idList = 'play_idList';
+var redis_food_idSet = 'food_idSet';
+var redis_play_idSet = 'play_idSet';
 var food_list = ['UW Plaza', '续缘轩火锅', '釜山韩国自助烧烤'];
 var play_list = ['去MC玩游戏', '举办一个迷你Hackathon', '各回各家各找各妈'];
 
@@ -66,26 +66,35 @@ module.exports = exports = function(webot){
   webot.set('投票吃啥',{
     description:'选择吃什么！',
     pattern: /(?:投票吃啥|投票吃？啥|food)\s*(\d*)/, //exam|
-    handler: function(info){
+    handler: function(info, next){
       var reply = '请输入选择代号，例如如果要选择' + food_list[0] + '，请输入 "1":\n';
       var choices = [];
       var i = 0;
-      for (i = 0; i < food_list.length; i++){
-        choices.push((i+1) + ': ' + food_list[i]);
-      }
-      reply += choices.join('\n');
-      console.log("entering food handler");
-      info.wait('wait_food');
-      return reply;
+      redis.sismember(redis_food_idSet, info.uid, function(err, value){
+        value = parseInt(value, 10);
+        if (value === 1){
+          next(null, '同学您已经投过票了哦');
+        }
+        else{
+          for (i = 0; i < food_list.length; i++){
+            choices.push((i+1) + ': ' + food_list[i]);
+          }
+          reply += choices.join('\n');
+          console.log("entering food handler");
+          info.wait('wait_food', next);
+          next(null, reply);
+        }
+      });
+      
     }
   });
-  webot.waitRule('wait_food', function(info) {
+  webot.waitRule('wait_food', function(info, next) {
     var choice_food = parseInt(info.text, 10);
     if (isNaN(choice_food) || choice_food < 1 || choice_food > food_list.length){
       return 'Out of bounds啦！祝你天天segmentation fault！';
     }
     redis.incr(redis_food_key_base+(choice_food-1));
-    redis.lpush(redis_food_idList, info.uid);
+    redis.sadd(redis_food_idSet, info.uid);
     console.log('吃_投票： ' + choice_food);
     return '谢谢您的投票';
   });
@@ -93,26 +102,35 @@ module.exports = exports = function(webot){
   webot.set('投票干啥',{
     description:'选择吃完干什么！',
     pattern: /(?:投票干啥|投票干？啥|play)\s*(\d*)/, //exam|
-    handler: function(info){
+    handler: function(info, next){
       var reply = '请输入选择代号，例如如果要选择' + play_list[0] + '，请输入 "1":\n';
       var choices = [];
       var i = 0;
-      for (i = 0; i < play_list.length; i++){
-        choices.push((i+1) + ': ' + play_list[i]);
-      }
-      reply += choices.join('\n');
-      console.log("entering play handler");
-      info.wait('wait_play');
-      return reply;
+
+      redis.sismember(redis_play_idSet, info.uid, function(err, value){
+        value = parseInt(value, 10);
+        if (value === 1){
+          next(null, '同学您已经投过票了哦');
+        }
+        else{
+          for (i = 0; i < play_list.length; i++){
+            choices.push((i+1) + ': ' + play_list[i]);
+          }
+          reply += choices.join('\n');
+          console.log("entering play handler");
+          info.wait('wait_play', next);
+          next(null, reply);
+        }
+      });
     }
   });
-  webot.waitRule('wait_play', function(info) {
+  webot.waitRule('wait_play', function(info, next) {
     var choice_play = parseInt(info.text, 10);
     if (isNaN(choice_play) || choice_play < 1 || choice_play > play_list.length){
       return 'Out of bounds啦！祝你天天segmentation fault！';
     }
     redis.incr(redis_play_key_base+(choice_food-1));
-    redis.lpush(redis_play_idList, info.uid);
+    redis.sadd(redis_play_idSet, info.uid);
     console.log('玩_投票：' + choice_play);
     return '谢谢您的投票';
   });
@@ -134,7 +152,7 @@ module.exports = exports = function(webot){
             if (isNaN(value)){
               value = 0;
             }
-            choices.push(i + ' ' + food_list[i] + ': ' + value);
+            choices.push((i+1) + ' ' + food_list[i] + ': ' + value);
             if (req_c === 0){
               reply += choices.join('\n');
               next(null, reply);
@@ -162,7 +180,7 @@ module.exports = exports = function(webot){
             if (isNaN(value)){
               value = 0;
             }
-            choices.push(i + ' ' + play_list[i] + ': ' + value);
+            choices.push((i+1) + ' ' + play_list[i] + ': ' + value);
             if (req_c === 0){
               reply += choices.join('\n');
               next(null, reply);
