@@ -115,9 +115,7 @@ module.exports = exports = function(webot){
           });
         })(i);
       }
-
     });
-    next(null, '谢谢您的投票');
   });
 
   webot.set('投票干啥',{
