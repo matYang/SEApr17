@@ -92,30 +92,32 @@ module.exports = exports = function(webot){
     if (isNaN(choice_food) || choice_food < 1 || choice_food > food_list.length){
       next(null, 'Out of bounds啦！祝你天天segmentation fault！');
     }
-    console.log('吃_投票： ' + choice_food);
-    redis.incr(redis_food_key_base+(choice_food-1),function(){
-      var reply = '谢谢您的投票！\n当前吃啥的投票结果:\n';
-      var choices = [];
-      var i = 0;
-      var req_c = food_list.length;
-      redis.sadd(redis_food_idSet, info.uid);
-      for (i = 0; i < food_list.length; i++){
-        (function(i) {
-          redis.get(redis_food_key_base+i, function(err, value){
-            req_c--;
-            value = parseInt(value, 10);
-            if (isNaN(value)){
-              value = 0;
-            }
-            choices.push((i+1) + ' ' + food_list[i] + ': ' + value);
-            if (req_c === 0){
-              reply += choices.join('\n');
-              next(null, reply);
-            }
-          });
-        })(i);
-      }
-    });
+    else{
+      console.log('吃_投票： ' + choice_food);
+      redis.incr(redis_food_key_base+(choice_food-1),function(){
+        var reply = '谢谢您的投票！\n当前吃啥的投票结果:\n';
+        var choices = [];
+        var i = 0;
+        var req_c = food_list.length;
+        redis.sadd(redis_food_idSet, info.uid);
+        for (i = 0; i < food_list.length; i++){
+          (function(i) {
+            redis.get(redis_food_key_base+i, function(err, value){
+              req_c--;
+              value = parseInt(value, 10);
+              if (isNaN(value)){
+                value = 0;
+              }
+              choices.push((i+1) + ' ' + food_list[i] + ': ' + value);
+              if (req_c === 0){
+                reply += choices.join('\n');
+                next(null, reply);
+              }
+            });
+          })(i);
+        }
+      });
+    }
   });
 
   webot.set('投票干啥',{
@@ -148,30 +150,32 @@ module.exports = exports = function(webot){
     if (isNaN(choice_play) || choice_play < 1 || choice_play > play_list.length){
       next(null, 'Out of bounds啦！祝你天天segmentation fault！');
     }
-    console.log('玩_投票：' + choice_play);
-    redis.incr(redis_play_key_base+(choice_play-1), function(){
-      var reply = '谢谢您的投票！\n当前吃完干啥的投票结果:\n';
-      var choices = [];
-      var i = 0;
-      var req_c = play_list.length;
-      redis.sadd(redis_play_idSet, info.uid);
-      for (i = 0; i < play_list.length; i++){
-        (function(i) {
-          redis.get(redis_play_key_base+i, function(err, value){
-            req_c--;
-            value = parseInt(value, 10);
-            if (isNaN(value)){
-              value = 0;
-            }
-            choices.push((i+1) + ' ' + play_list[i] + ': ' + value);
-            if (req_c === 0){
-              reply += choices.join('\n');
-              next(null, reply);
-            }
-          });
-        })(i);
-      }
-    });
+    else{
+      console.log('玩_投票：' + choice_play);
+      redis.incr(redis_play_key_base+(choice_play-1), function(){
+        var reply = '谢谢您的投票！\n当前吃完干啥的投票结果:\n';
+        var choices = [];
+        var i = 0;
+        var req_c = play_list.length;
+        redis.sadd(redis_play_idSet, info.uid);
+        for (i = 0; i < play_list.length; i++){
+          (function(i) {
+            redis.get(redis_play_key_base+i, function(err, value){
+              req_c--;
+              value = parseInt(value, 10);
+              if (isNaN(value)){
+                value = 0;
+              }
+              choices.push((i+1) + ' ' + play_list[i] + ': ' + value);
+              if (req_c === 0){
+                reply += choices.join('\n');
+                next(null, reply);
+              }
+            });
+          })(i);
+        }
+      });
+    }
   });
 
 
