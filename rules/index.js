@@ -120,7 +120,7 @@ module.exports = exports = function(webot){
   webot.set('统计吃啥',{
     description:'查看吃啥投票结果！',
     pattern: /(?:统计吃啥|统计吃？啥|play)\s*(\d*)/, //exam|
-    handler: function(info){
+    handler: function(info, next){
       var reply = '当前吃啥的投票结果:\n';
       var choices = [];
       var i = 0;
@@ -148,7 +148,7 @@ module.exports = exports = function(webot){
   webot.set('统计干啥',{
     description:'查看吃完干啥投票结果！',
     pattern: /(?:统计干啥|统计干？啥|play)\s*(\d*)/, //exam|
-    handler: function(info){
+    handler: function(info, next){
       var reply = '当前吃完干啥的投票结果:\n';
       var choices = [];
       var i = 0;
