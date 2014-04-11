@@ -36,7 +36,7 @@ module.exports = exports = function(webot){
       var reply = {
         title: '感谢你关注uwse公众平台',
         pic: 'https://cs.uwaterloo.ca/~rtholmes/img/waterloo-se_logo-alpha.png',
-        url: 'https://github.com/node-webot',
+        url: 'http://games.usvsth3m.com/2048/se-waterloo-edition-3/',
         description: [
           '你可以试试以下指令:',
           'help : 显示可用指令',
@@ -96,7 +96,7 @@ module.exports = exports = function(webot){
     redis.incr(redis_food_key_base+(choice_food-1));
     redis.sadd(redis_food_idSet, info.uid);
     console.log('吃_投票： ' + choice_food);
-    return '谢谢您的投票';
+    next(null, '谢谢您的投票');
   });
 
   webot.set('投票干啥',{
@@ -132,7 +132,7 @@ module.exports = exports = function(webot){
     redis.incr(redis_play_key_base+(choice_food-1));
     redis.sadd(redis_play_idSet, info.uid);
     console.log('玩_投票：' + choice_play);
-    return '谢谢您的投票';
+    next(null, '谢谢您的投票');
   });
 
   webot.set('统计吃啥',{
