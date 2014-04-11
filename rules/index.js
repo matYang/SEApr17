@@ -10,8 +10,12 @@ var _ = require('underscore')._;
 //A blocking library enable us to wait for API response
 var httpsync = require('httpsync');
 var utils = require('../utils/utils.js');
-// var redis = require('../utils/redis.js').initialize();
+var redis = require('../utils/redis.js').initialize();
 
+var redis_food_key_base = 'food-';
+var redis_play_key_base = 'play-';
+var food_list = ['UW Plaza', '续缘轩火锅', '釜山韩国自助烧烤'];
+var play_list = ['去MC玩游戏', '举办一个迷你Hackathon', '各回各家各找各妈'];
 
 module.exports = exports = function(webot){
   webot.loads('./uwaterloo/terms/exam_schedule');
@@ -29,7 +33,7 @@ module.exports = exports = function(webot){
       var userName = info.uid;
       var reply = {
         title: '感谢你关注uwse公众平台',
-        pic: 'http://i.imgur.com/ySk4ojW.jpg',
+        pic: 'https://cs.uwaterloo.ca/~rtholmes/img/waterloo-se_logo-alpha.png',
         url: 'https://github.com/node-webot',
         description: [
           '你可以试试以下指令:',
@@ -37,8 +41,8 @@ module.exports = exports = function(webot){
           'emma : 调戏公众Matt',
           '安排  : 查看4月17日安排',
           '有谁  : 查看4月17日都有谁来',
-          '吃啥  : 投票选择4月17日吃什么',
-          '玩啥  : 投票选择4月17日玩什么'
+          '吃啥  : 投票选择4月17日吃啥',
+          '吃完干啥  : 投票选择4月17日饭后干啥'
         ].join('\n')
       };
       next(null,reply);
@@ -58,32 +62,52 @@ module.exports = exports = function(webot){
     description:'选择吃什么！',
     pattern: /(?:吃啥|吃？啥|food)\s*(\d*)/, //exam|
     handler: function(info){
+      var reply = '请输入选择代号，例如如果要选择' + food_list[0] + '，请输入 "1":\n';
+      var choices = [];
+      var i = 0;
+      for (i = 0; i < food_list.length; i++){
+        choices.push((i+1) + ': ' + food_list[i]);
+      }
+      reply += choices.join('\n');
       console.log("entering food handler");
       info.wait('wait_food');
-      return "请输入选择代号，例如如果要选择Sushi，请输入 '1':\n1: Sushi\n2: 火锅\n3: 烧烤";
+      return reply;
     }
   });
   webot.waitRule('wait_food', function(info) {
     var choice_food = parseInt(info.text, 10);
-    var output = '谢谢您的投票';
+    if (choice_food < 1 || choice_food > food_list.length){
+      return 'Out of bounds啦！祝你segmentation fault！';
+    }
+    redis.incr(redis_food_key_base+(choice_food-1));
     console.log('吃_投票： ' + choice_food);
-    return output;
+    return '谢谢您的投票';
   });
 
-  webot.set('玩啥',{
+  webot.set('吃完干啥',{
     description:'选择玩什么！',
-    pattern: /(?:玩啥|玩？啥|play)\s*(\d*)/, //exam|
+    pattern: /(?:吃完干啥|吃完干？啥|play)\s*(\d*)/, //exam|
     handler: function(info){
+      var reply = '请输入选择代号，例如如果要选择' + play_list[0] + '，请输入 "1":\n';
+      var choices = [];
+      var i = 0;
+      for (i = 0; i < play_list.length; i++){
+        choices.push((i+1) + ': ' + play_list[i]);
+      }
+      reply += choices.join('\n');
       console.log("entering play handler");
       info.wait('wait_play');
-      return "请输入选择代号，例如如果要选择三国杀，请输入 '1':\n1: 三国杀\n2: 杀人游戏\n3: hackathon";
+      return reply;
     }
   });
   webot.waitRule('wait_play', function(info) {
     var choice_play = parseInt(info.text, 10);
-    var output = '谢谢您的投票';
+    if (choice_play < 1 || choice_play > play_list.length){
+      return 'Out of bounds啦！祝你segmentation fault！';
+    }
+    redis.incr(redis_play_key_base+(choice_food-1));
     console.log('玩_投票：' + choice_play);
-    return output;
+    return '谢谢您的投票';
   });
 
 
