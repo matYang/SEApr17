@@ -12,8 +12,10 @@ var httpsync = require('httpsync');
 var utils = require('../utils/utils.js');
 var redis = require('../utils/redis.js').initialize();
 
-var redis_food_key_base = 'food-';
-var redis_play_key_base = 'play-';
+var redis_food_key_base = 'food_';
+var redis_play_key_base = 'play_';
+var redis_food_idList = 'food_idList';
+var redis_play_idList = 'play_idList';
 var food_list = ['UW Plaza', '续缘轩火锅', '釜山韩国自助烧烤'];
 var play_list = ['去MC玩游戏', '举办一个迷你Hackathon', '各回各家各找各妈'];
 
@@ -41,8 +43,8 @@ module.exports = exports = function(webot){
           'emma : 调戏公众Matt',
           '安排  : 查看4月17日安排',
           '有谁  : 查看4月17日都有谁来',
-          '吃啥  : 投票选择4月17日吃啥',
-          '吃完干啥  : 投票选择4月17日饭后干啥'
+          '投票吃啥  : 投票选择4月17日吃啥',
+          '投票吃完干啥  : 投票选择4月17日饭后干啥'
         ].join('\n')
       };
       next(null,reply);
@@ -60,7 +62,7 @@ module.exports = exports = function(webot){
 
   webot.set('吃啥',{
     description:'选择吃什么！',
-    pattern: /(?:吃啥|吃？啥|food)\s*(\d*)/, //exam|
+    pattern: /(?:投票吃啥|投票吃？啥|food)\s*(\d*)/, //exam|
     handler: function(info){
       var reply = '请输入选择代号，例如如果要选择' + food_list[0] + '，请输入 "1":\n';
       var choices = [];
@@ -76,17 +78,18 @@ module.exports = exports = function(webot){
   });
   webot.waitRule('wait_food', function(info) {
     var choice_food = parseInt(info.text, 10);
-    if (choice_food < 1 || choice_food > food_list.length){
-      return 'Out of bounds啦！祝你segmentation fault！';
+    if (isNaN(choice_food) || choice_food < 1 || choice_food > food_list.length){
+      return 'Out of bounds啦！祝你天天segmentation fault！';
     }
     redis.incr(redis_food_key_base+(choice_food-1));
+    redis.lpush(redis_food_idList, info.uid);
     console.log('吃_投票： ' + choice_food);
     return '谢谢您的投票';
   });
 
   webot.set('吃完干啥',{
     description:'选择玩什么！',
-    pattern: /(?:吃完干啥|吃完干？啥|play)\s*(\d*)/, //exam|
+    pattern: /(?:投票吃完干啥|投票吃完干？啥|play)\s*(\d*)/, //exam|
     handler: function(info){
       var reply = '请输入选择代号，例如如果要选择' + play_list[0] + '，请输入 "1":\n';
       var choices = [];
@@ -102,10 +105,11 @@ module.exports = exports = function(webot){
   });
   webot.waitRule('wait_play', function(info) {
     var choice_play = parseInt(info.text, 10);
-    if (choice_play < 1 || choice_play > play_list.length){
-      return 'Out of bounds啦！祝你segmentation fault！';
+    if (isNaN(choice_play) || choice_play < 1 || choice_play > play_list.length){
+      return 'Out of bounds啦！祝你天天segmentation fault！';
     }
     redis.incr(redis_play_key_base+(choice_food-1));
+    redis.lpush(redis_play_idList, info.uid);
     console.log('玩_投票：' + choice_play);
     return '谢谢您的投票';
   });
