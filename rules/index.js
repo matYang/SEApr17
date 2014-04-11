@@ -39,12 +39,15 @@ module.exports = exports = function(webot){
         url: 'https://github.com/node-webot',
         description: [
           '你可以试试以下指令:',
+          'help : 显示可用指令',
           'exam : 查看exam schedule',
           'emma : 调戏公众Matt',
           '安排  : 查看4月17日安排',
           '有谁  : 查看4月17日都有谁来',
           '投票吃啥  : 投票选择4月17日吃啥',
-          '投票吃完干啥  : 投票选择4月17日饭后干啥'
+          '投票干啥  : 投票选择4月17日饭后干啥',
+          '统计吃啥  : 查看吃啥的投票统计',
+          '统计干啥  : 查看饭后干啥的投票统计'
         ].join('\n')
       };
       next(null,reply);
@@ -60,7 +63,7 @@ module.exports = exports = function(webot){
 
 
 
-  webot.set('吃啥',{
+  webot.set('投票吃啥',{
     description:'选择吃什么！',
     pattern: /(?:投票吃啥|投票吃？啥|food)\s*(\d*)/, //exam|
     handler: function(info){
@@ -87,9 +90,9 @@ module.exports = exports = function(webot){
     return '谢谢您的投票';
   });
 
-  webot.set('吃完干啥',{
-    description:'选择玩什么！',
-    pattern: /(?:投票吃完干啥|投票吃完干？啥|play)\s*(\d*)/, //exam|
+  webot.set('投票干啥',{
+    description:'选择吃完干什么！',
+    pattern: /(?:投票干啥|投票干？啥|play)\s*(\d*)/, //exam|
     handler: function(info){
       var reply = '请输入选择代号，例如如果要选择' + play_list[0] + '，请输入 "1":\n';
       var choices = [];
@@ -114,7 +117,61 @@ module.exports = exports = function(webot){
     return '谢谢您的投票';
   });
 
+  webot.set('统计吃啥',{
+    description:'查看吃啥投票结果！',
+    pattern: /(?:统计吃啥|统计吃？啥|play)\s*(\d*)/, //exam|
+    handler: function(info){
+      var reply = '当前吃啥的投票结果:\n';
+      var choices = [];
+      var i = 0;
+      var req_c = food_list.length;
+      console.log("entering food toll handler");
+      for (i = 0; i < food_list.length; i++){
+        (function(i) {
+          redis.get(redis_food_key_base+i, function(err, value){
+            req_c--;
+            value = parseInt(value, 10);
+            if (isNaN(value)){
+              value = 0;
+            }
+            choices.push(i + ' ' + food_list[i] + ': ' + value);
+            if (req_c === 0){
+              reply += choices.join('\n');
+              next(null, reply);
+            }
+          });
+        })(i);
+      }
+    }
+  });
 
+  webot.set('统计干啥',{
+    description:'查看吃完干啥投票结果！',
+    pattern: /(?:统计干啥|统计干？啥|play)\s*(\d*)/, //exam|
+    handler: function(info){
+      var reply = '当前吃完干啥的投票结果:\n';
+      var choices = [];
+      var i = 0;
+      var req_c = play_list.length;
+      console.log("entering play toll handler");
+      for (i = 0; i < play_list.length; i++){
+        (function(i) {
+          redis.get(redis_play_key_base+i, function(err, value){
+            req_c--;
+            value = parseInt(value, 10);
+            if (isNaN(value)){
+              value = 0;
+            }
+            choices.push(i + ' ' + play_list[i] + ': ' + value);
+            if (req_c === 0){
+              reply += choices.join('\n');
+              next(null, reply);
+            }
+          });
+        })(i);
+      }
+    }
+  });
 
   // 更简单地设置一条规则
   webot.set(/^more$/i, function(info){
